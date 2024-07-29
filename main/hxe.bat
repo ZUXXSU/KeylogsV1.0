@@ -1,0 +1,1 @@
+start /MIN /B python x.py

